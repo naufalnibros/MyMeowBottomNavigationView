@@ -4,9 +4,12 @@ import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +19,8 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
 import com.codeinger.mymeowbottomnavigationview.api.ApiClient;
+import com.codeinger.mymeowbottomnavigationview.api.ApiInterface;
+import com.codeinger.mymeowbottomnavigationview.data.TampilSemua;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,6 +28,12 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -33,6 +44,10 @@ public class HomeFragment extends Fragment {
 
     private ListView listView;
     private String JSON_STRING;
+
+    private final Retrofit api = ApiClient.getClient();
+
+    private final List<TampilSemua> list = new ArrayList<>();
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -115,4 +130,23 @@ public class HomeFragment extends Fragment {
 
     }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        api.create(ApiInterface.class).sampleTampilSemua().enqueue(new Callback<List<TampilSemua>>() {
+            @Override
+            public void onResponse(Call<List<TampilSemua>> call, Response<List<TampilSemua>> response) {
+                if (response.body() != null) {
+                    list.clear();
+                    list.addAll(response.body());
+                    Log.d(getClass().getSimpleName(), "sampleTampilSemua onResponse: list="+list);
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<TampilSemua>> call, Throwable t) {
+
+            }
+        });
+    }
 }
